@@ -20,7 +20,7 @@ _model: AutoModelForSeq2SeqLM | None = None
 _device: torch.device | None = None
 
 
-def _load_model() -> None:
+def _load_model():
     """Load tokenizer and model into module-level variables."""
     global _tokenizer, _model, _device
     _device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -29,7 +29,7 @@ def _load_model() -> None:
     _model.eval()
 
 
-def _ensure_loaded() -> None:
+def _ensure_loaded():
     if _model is None:
         _load_model()
 

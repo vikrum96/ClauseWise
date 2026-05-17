@@ -9,9 +9,11 @@ and reasoner modules. Segmentation is handled upstream (see segmenter.py).
 import re
 from typing import Any, Dict, List, Optional
 
-from src.classifier import classify_clause
+from src.classifier import classify_clause, classify_clauses_batch
 from src.extractor import extract_clause_qa
 from src.reasoner import reason
+from src.retriever import search
+
 
 # Red flag categories (programmer-defined, same as notebook)
 RED_FLAG_TYPES = [
@@ -74,7 +76,7 @@ def detect_requested_clause(user_input: str, clauses: List[Dict[str, Any]]) -> O
     return None
 
 
-def detect_summary_request(user_input: str) -> bool:
+def detect_summary_request(user_input):
     summary_triggers = [
         "summary", "summarize", "summarise", "overview", "key points",
         "explain the contract", "what is this contract about",
@@ -83,7 +85,7 @@ def detect_summary_request(user_input: str) -> bool:
     return any(t in user_input.lower() for t in summary_triggers)
 
 
-def get_representative_clauses(clauses: List[Dict[str, Any]], k: int = 5) -> List[Dict[str, Any]]:
+def get_representative_clauses(clauses, k=5):
     return clauses[:k]
 
 
@@ -105,29 +107,27 @@ def detect_red_flag_request(user_input: str) -> bool:
 
 
 def find_top_red_flag_clauses(clauses: List[Dict[str, Any]], top_k: int = 8) -> tuple[List[Dict[str, Any]], Dict[int, List[str]]]:
-    red_flag_clauses = []
+    texts = [c["text"] for c in clauses]
+    all_labels = classify_clauses_batch(texts)  # one batched call
+    
     classification_results = {}
-
-    for c in clauses:
-        labels = classify_clause(c["text"])
+    red_flag_clauses = []
+    
+    for c, labels in zip(clauses, all_labels):
         classification_results[c["clause_id"]] = labels
-
         overlap = [lbl for lbl in labels if lbl in RED_FLAG_TYPES]
         if overlap:
-            score = len(overlap)
-            red_flag_clauses.append((score, c))
-
+            red_flag_clauses.append((len(overlap), c))
+    
     if not red_flag_clauses:
         return [], classification_results
-
+    
     red_flag_clauses.sort(key=lambda x: x[0], reverse=True)
     top_clauses = [c for _, c in red_flag_clauses[:top_k]]
-
     top_classification_results = {
-        cid: classification_results[cid]
-        for cid in [c["clause_id"] for c in top_clauses]
+        c["clause_id"]: classification_results[c["clause_id"]]
+        for c in top_clauses
     }
-
     return top_clauses, top_classification_results
 
 
@@ -190,7 +190,8 @@ def route_user_query(user_input: str, clauses: List[Dict[str, Any]]) -> str:
     1. If user asks about a specific clause, select it (classify if requested).
     2. If user asks for red flags, scan all clauses via LegalBERT.
     3. If user asks for a summary, use representative clauses.
-    4. Otherwise retrieve top-k relevant clauses by keyword overlap.
+    4. Otherwise retrieve top-k relevant clauses via FAISS semantic search
+   (falls back to keyword overlap if index is unavailable).
     5. Run FLAN-T5 extraction for question-type queries.
     6. Assemble reasoning prompt and call Groq (DeepSeek-R1 distill).
 
@@ -222,9 +223,7 @@ def route_user_query(user_input: str, clauses: List[Dict[str, Any]]) -> str:
 
     elif is_red_flag_request:
         # User explicitly wants red flags -> scan all clauses
-        selected_clauses, classification_results = find_top_red_flag_clauses(
-            clauses, top_k=5
-        )
+        selected_clauses, classification_results = find_top_red_flag_clauses(clauses, top_k=5)
         if not selected_clauses:
             # Model didn't find any of programmer-defined red-flag categories
             no_model_red_flags = True
@@ -236,7 +235,9 @@ def route_user_query(user_input: str, clauses: List[Dict[str, Any]]) -> str:
         if detect_summary_request(user_input):
             selected_clauses = get_representative_clauses(clauses, k=5)
         else:
-            selected_clauses = retrieve_relevant_clauses(user_input, clauses, k=5)
+            selected_clauses = search(user_input, k=5)
+            if not selected_clauses:  # fallback if index not built
+                selected_clauses = retrieve_relevant_clauses(user_input, clauses, k=5)
 
         need_classification = "classify" in text_lower or "type" in text_lower
         if need_classification:
@@ -251,9 +252,10 @@ def route_user_query(user_input: str, clauses: List[Dict[str, Any]]) -> str:
     )
 
     # Basic heuristics for extraction
-    need_extraction = any(
-        q in text_lower
-        for q in ["what", "when", "who", "how much", "define", "meaning", "obligation"]
+    need_extraction = (
+        not is_red_flag_request
+        and not detect_summary_request(user_input)
+        and any(q in text_lower for q in ["what", "when", "who", "how much", "define", "meaning", "obligation"])
     )
     extracted_answer = extract_clause_qa(user_input, context) if need_extraction else None
 

@@ -28,6 +28,8 @@ from src.classifier import _ensure_loaded as load_classifier
 from src.extractor import _ensure_loaded as load_extractor
 from src.segmenter import ContractSegmenter, load_contract_text
 from src.pipeline import route_user_query
+from src.retriever import build_index
+from src.retriever import _ensure_loaded as load_retriever
 
 # Logging
 logging.basicConfig(
@@ -65,6 +67,10 @@ async def lifespan(app: FastAPI):
     logger.info("Loading extractor (FLAN-T5 + LoRA)...")
     load_extractor()
     logger.info("Extractor loaded.")
+
+    logger.info("Loading retriever (sentence-transformers)...")
+    load_retriever()
+    logger.info("Retriever loaded.")
 
     logger.info("All models loaded. ClauseWise is ready.")
     yield
@@ -176,7 +182,11 @@ async def analyze(
             detail="No clauses could be extracted from the uploaded document.",
         )
 
-    logger.info("Segmented contract into %d clauses.", len(clauses))
+    try:
+        build_index(clauses)
+        logger.info("FAISS index built for %d clauses.", len(clauses))
+    except Exception as e:
+        logger.error("FAISS index build failed: %s", e)
 
     # Run pipeline
     try:

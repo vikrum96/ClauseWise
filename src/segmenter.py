@@ -34,7 +34,7 @@ NUMBERED_HEADING_PATTERN = re.compile(
 
 # ALL CAPS headings: "CONFIDENTIALITY", "LIMITATION OF LIABILITY"
 # We infer heading if line has mostly uppercase letters.
-def looks_like_all_caps_heading(line: str, min_len: int = 5, min_upper_ratio: float = 0.8) -> bool:
+def looks_like_all_caps_heading(line, min_len=5, min_upper_ratio=0.8):
     s = line.strip()
     if len(s) < min_len:
         return False
@@ -60,7 +60,7 @@ class ContractSegmenter:
         self.min_clause_len_chars = min_clause_len_chars
         self.merge_short_clauses = merge_short_clauses
 
-    def segment_contract(self, text: str) -> List[Dict[str, Any]]:
+    def segment_contract(self, text) -> List[Dict[str, Any]]:
         text = self._preprocess(text)
         sections = self._segment_sections(text)
         clauses = self._segment_clauses_within_sections(sections)
@@ -69,7 +69,7 @@ class ContractSegmenter:
         # Return list of plain dicts
         return [asdict(c) for c in clauses]
 
-    def _preprocess(self, text: str) -> str:
+    def _preprocess(self, text):
         if not text:
             return ""
 
@@ -81,7 +81,7 @@ class ContractSegmenter:
         lines = [ln.rstrip() for ln in text.split("\n")]
         return "\n".join(lines)
 
-    def _is_section_heading(self, line: str) -> bool:
+    def _is_section_heading(self, line):
         """
         Check: does this line look like a section heading?
         """
@@ -103,7 +103,7 @@ class ContractSegmenter:
 
         return False
 
-    def _segment_sections(self, text: str) -> List[Section]:
+    def _segment_sections(self, text):
         lines = text.split("\n")
 
         sections: List[Section] = []
@@ -154,7 +154,7 @@ class ContractSegmenter:
 
         return sections
 
-    def _parse_subclause_label(self, line: str) -> Optional[str]:
+    def _parse_subclause_label(self, line):
         """
         Check if a line starts a subclause (e.g., "(a) Text" or "a) Text").
         Returns the label (e.g., "(a)", "a)", "(1)") or None.
@@ -173,14 +173,12 @@ class ContractSegmenter:
 
         return None
 
-    def _strip_subclause_marker(self, line: str) -> str:
+    def _strip_subclause_marker(self, line):
         line = SUBCLAUSE_PAREN_PATTERN.sub("", line, count=1)
         line = SUBCLAUSE_SUFFIX_PATTERN.sub("", line, count=1)
         return line.lstrip()
 
-    def _segment_clauses_within_sections(
-        self, sections: List[Section]
-    ) -> List[Clause]:
+    def _segment_clauses_within_sections(self, sections: List[Section]) -> List[Clause]:
         """
         For each section, split into clauses based on subclause markers.
         If no markers are found, treat the whole section as a single clause.
@@ -238,7 +236,7 @@ class ContractSegmenter:
 
         return clauses
 
-    def _cleanup_clauses(self, clauses: List[Clause]) -> List[Clause]:
+    def _cleanup_clauses(self, clauses):
         if not self.merge_short_clauses or not clauses:
             return clauses
 
@@ -278,7 +276,7 @@ class ContractSegmenter:
         return cleaned
 
 
-def load_contract_text(input_path: str) -> str:
+def load_contract_text(input_path):
     ext = os.path.splitext(input_path)[1].lower()
 
     if ext == ".txt":
