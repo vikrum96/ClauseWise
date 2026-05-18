@@ -13,9 +13,13 @@ Environment variables optional:
     PORT                — Port to run on (default: 8000)
 """
 # Imports
+from dotenv import load_dotenv
+load_dotenv()
+
 import logging
 import os
 import uuid
+import tempfile
 from contextlib import asynccontextmanager
 
 import boto3
@@ -139,7 +143,7 @@ async def analyze(
 
     # Save to temp file
     # ECS tasks have a writable /tmp directory
-    temp_path = f"/tmp/{uuid.uuid4().hex}{ext}"
+    temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4().hex}{ext}")
 
     try:
         contents = await file.read()

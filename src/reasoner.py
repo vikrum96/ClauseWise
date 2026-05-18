@@ -13,7 +13,7 @@ import re
 from groq import Groq
 
 # Config
-MODEL_ID = "deepseek-r1-distill-llama-70b"
+MODEL_ID = "llama-3.3-70b-versatile"
 MAX_TOKENS = 900
 TEMPERATURE = 0.3
 
