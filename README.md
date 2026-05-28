@@ -150,4 +150,5 @@ ClauseWise/
 ---
 
 ## Known Limitations
-- Retrieval quality degrades on long contracts where the most important clauses appear in later sections — FAISS returns semantically similar clauses but the segmenter indexes all 600+ clauses equally, so early introductory clauses can crowd out substantive ones.
+- Retrieval quality degrades on long contracts where the most important clauses appear in later sections.
+  - FAISS returns semantically similar clauses but the segmenter indexes all 600+ clauses equally, so early introductory clauses can crowd out substantive ones.
