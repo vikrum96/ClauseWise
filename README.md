@@ -3,6 +3,7 @@
 An end-to-end NLP system for legal contract analysis. Upload a contract, ask a question, and get a grounded answer backed by clause classification, information extraction, and LLM reasoning.
 
 <!-- [Insert a screenshot of the analyze endpoint returning a red flag response here] -->
+<img width="1591" height="232" alt="Screenshot 2026-05-28 141507" src="https://github.com/user-attachments/assets/0f1686f2-f394-496f-8af1-3b10dceeef49" />
 
 ---
 
@@ -19,8 +20,8 @@ See the demo video for a full walkthrough of the running system.
 ## Architecture
 
 ClauseWise is deployed on AWS ECS Fargate with a FastAPI serving layer, S3 document storage, and CloudWatch monitoring. CI/CD is handled via GitHub Actions.
+<img width="1086" height="627" alt="Screenshot 2026-05-28 143726" src="https://github.com/user-attachments/assets/2d881d26-6593-4ed8-b54f-a64130b3f98c" />
 
-<!-- [MANUAL: Insert an architecture diagram here. Draw one at https://app.diagrams.net showing: User → FastAPI (ECS Fargate) → S3, LegalBERT, FLAN-T5, FAISS, Groq API, CloudWatch] -->
 
 **Request flow:**
 1. User uploads a contract (`.txt` or `.pdf`) and a question via the `/analyze` endpoint
@@ -55,11 +56,22 @@ ClauseWise is deployed on AWS ECS Fargate with a FastAPI serving layer, S3 docum
 
 ## Infrastructure
 
-<!-- [MANUAL: Insert the CloudWatch logs screenshot here] -->
+<!-- [CloudWatch Logs] -->
+CloudWatch Logs
+<img width="1637" height="246" alt="aws-3" src="https://github.com/user-attachments/assets/92910b28-f228-4cbc-9a93-40e28d4e1197" />
 
-<!-- [MANUAL: Insert the CloudWatch alarms screenshot here] -->
+<!-- [CloudWatch Alarms] -->
+CloudWatch Alarms
+<img width="1558" height="672" alt="aws-2" src="https://github.com/user-attachments/assets/866bb3b2-649a-432c-977d-d97812b1523f" />
 
-<!-- [MANUAL: Insert the GitHub Actions green workflow screenshot here] -->
+<!-- [ECS Running Task] -->
+ECS Running Task
+<img width="1423" height="180" alt="aws-4" src="https://github.com/user-attachments/assets/4448065d-3371-4424-8a89-05ce2bdcfb89" />
+
+<!-- [GitHub Actions] -->
+GitHub Actions
+<img width="1458" height="107" alt="aws-1" src="https://github.com/user-attachments/assets/8fc42d99-c1bc-49da-a639-e79b04151231" />
+
 
 | Component | Service |
 |---|---|
