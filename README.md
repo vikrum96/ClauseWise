@@ -56,20 +56,16 @@ ClauseWise is deployed on AWS ECS Fargate with a FastAPI serving layer, S3 docum
 
 ## Infrastructure
 
-<!-- [CloudWatch Logs] -->
-CloudWatch Logs
+**CloudWatch Logs**
 <img width="1637" height="246" alt="aws-3" src="https://github.com/user-attachments/assets/92910b28-f228-4cbc-9a93-40e28d4e1197" />
 
-<!-- [CloudWatch Alarms] -->
-CloudWatch Alarms
+**CloudWatch Alarms**
 <img width="1558" height="672" alt="aws-2" src="https://github.com/user-attachments/assets/866bb3b2-649a-432c-977d-d97812b1523f" />
 
-<!-- [ECS Running Task] -->
-ECS Running Task
+**ECS Running Task**
 <img width="1423" height="180" alt="aws-4" src="https://github.com/user-attachments/assets/4448065d-3371-4424-8a89-05ce2bdcfb89" />
 
-<!-- [GitHub Actions] -->
-GitHub Actions
+**GitHub Actions**
 <img width="1458" height="107" alt="aws-1" src="https://github.com/user-attachments/assets/8fc42d99-c1bc-49da-a639-e79b04151231" />
 
 
@@ -89,7 +85,7 @@ GitHub Actions
 
 ## Stack
 
-**ML / AI:** PyTorch, HuggingFace Transformers, PEFT/LoRA, FAISS, sentence-transformers, LangChain
+**ML / AI:** PyTorch, HuggingFace Transformers, PEFT/LoRA, FAISS, sentence-transformers
 
 **Backend:** FastAPI, Python, Docker
 
@@ -104,7 +100,7 @@ GitHub Actions
 **Prerequisites:** Python 3.10.6, a [Groq API key](https://console.groq.com) (free)
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/ClauseWise.git
+git clone https://github.com/vikrum96/ClauseWise.git
 cd ClauseWise
 python -m venv .venv
 .venv\Scripts\activate  # Windows
@@ -164,4 +160,4 @@ ClauseWise/
 ---
 
 ## Known Limitations
-Retrieval quality degrades on long contracts where the most important clauses are in later sections.
+- Retrieval quality degrades on long contracts where the most important clauses appear in later sections — FAISS returns semantically similar clauses but the segmenter indexes all 600+ clauses equally, so early introductory clauses can crowd out substantive ones.
