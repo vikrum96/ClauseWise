@@ -3,7 +3,7 @@
 An end-to-end NLP system for legal contract analysis. Upload a contract, ask a question, and get a grounded answer backed by clause classification, information extraction, and LLM reasoning.
 
 <!-- [Insert a screenshot of the analyze endpoint returning a red flag response here] -->
-<img width="1591" height="232" alt="Screenshot 2026-05-28 141507" src="https://github.com/user-attachments/assets/0f1686f2-f394-496f-8af1-3b10dceeef49" />
+<img width="1547" height="276" alt="Screenshot 2026-05-28 141452" src="https://github.com/user-attachments/assets/8333c7bc-baee-4741-921b-5f6c6073287a" />
 
 ---
 
